@@ -1,8 +1,7 @@
-import React from "react";
 import {useState, useEffect} from "react";
 import Error from "./Error";
 
-const Formulario = ({setPacientes}) => {
+const Formulario = ({pacientes, setPacientes, paciente, setPaciente}) => {
 	const [nombreMascota, setNombreMascota] = useState("");
 	const [nombrePropietario, setNombrePropietario] = useState("");
 	const [email, setEmail] = useState("");
@@ -10,6 +9,22 @@ const Formulario = ({setPacientes}) => {
 	const [sintomas, setSintomas] = useState("");
 
 	const [error, setError] = useState(false);
+
+	useEffect(() => {
+		if (Object.keys(paciente).length !== 0) {
+			setNombreMascota(paciente.nombreMascota);
+			setNombrePropietario(paciente.nombrePropietario);
+			setEmail(paciente.email);
+			setFechaAlta(paciente.fechaAlta);
+			setSintomas(paciente.sintomas);
+		} else {
+			setNombreMascota("");
+			setNombrePropietario("");
+			setEmail("");
+			setFechaAlta("");
+			setSintomas("");
+		}
+	}, [paciente]);
 
 	const generateId = () => {
 		const random = Math.random().toString(36).substring(2);
@@ -40,15 +55,26 @@ const Formulario = ({setPacientes}) => {
 			return;
 		}
 
-		const paciente = {
+		const objPaciente = {
 			nombreMascota,
 			nombrePropietario,
 			email,
 			fechaAlta,
 			sintomas,
-			id: generateId(),
 		};
-		setPacientes((prevPacientes) => [...prevPacientes, paciente]);
+
+		if (paciente.id) {
+			objPaciente.id = paciente.id;
+			const pacientesFiltrados = pacientes.map((pacienteState) =>
+				pacienteState.id === paciente.id ? objPaciente : pacienteState
+			);
+			setPacientes(pacientesFiltrados);
+			setPaciente({});
+		} else {
+			objPaciente.id = generateId();
+			setPacientes((prevPacientes) => [...prevPacientes, objPaciente]);
+		}
+
 		reset();
 	};
 
@@ -130,7 +156,7 @@ const Formulario = ({setPacientes}) => {
 				</div>
 				<input
 					type='submit'
-					value={"Agregar paciente"}
+					value={paciente.id ? "Actualizar paciente" : "Agregar paciente"}
 					className='bg-indigo-600 w-full text-white p-3 uppercase font-bold cursor-pointer hover:bg-indigo-700 transition-colors'
 				/>
 			</form>
